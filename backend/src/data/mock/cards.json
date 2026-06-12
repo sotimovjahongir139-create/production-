@@ -1,0 +1,38 @@
+{
+  "daily": {
+    "kpi": { "total_in": 148, "completed": 121, "efficiency_pct": 81.8 },
+    "prev_kpi": { "total_in": 146, "completed": 118, "efficiency_pct": 80.8 },
+    "departments": [
+      { "name": "Chaxlash",       "came_in": 32, "completed": 29, "efficiency": 90.6, "status": "good" },
+      { "name": "Lazer",          "came_in": 28, "completed": 24, "efficiency": 85.7, "status": "good" },
+      { "name": "Quyish PU",      "came_in": 25, "completed": 20, "efficiency": 80.0, "status": "medium" },
+      { "name": "Quyish TEP",     "came_in": 22, "completed": 18, "efficiency": 81.8, "status": "medium" },
+      { "name": "Sifat Nazorati", "came_in": 24, "completed": 12, "efficiency": 50.0, "status": "critical" },
+      { "name": "Sklad",          "came_in": 17, "completed": 18, "efficiency": 94.1, "status": "good" }
+    ]
+  },
+  "weekly": {
+    "kpi": { "total_in": 1024, "completed": 862, "efficiency_pct": 84.2 },
+    "prev_kpi": { "total_in": 1015, "completed": 850, "efficiency_pct": 83.7 },
+    "departments": [
+      { "name": "Chaxlash",       "came_in": 220, "completed": 198, "efficiency": 90.0, "status": "good" },
+      { "name": "Lazer",          "came_in": 195, "completed": 168, "efficiency": 86.2, "status": "good" },
+      { "name": "Quyish PU",      "came_in": 178, "completed": 142, "efficiency": 79.8, "status": "medium" },
+      { "name": "Quyish TEP",     "came_in": 165, "completed": 130, "efficiency": 78.8, "status": "medium" },
+      { "name": "Sifat Nazorati", "came_in": 158, "completed": 96,  "efficiency": 60.8, "status": "medium" },
+      { "name": "Sklad",          "came_in": 108, "completed": 128, "efficiency": 88.9, "status": "good" }
+    ]
+  },
+  "monthly": {
+    "kpi": { "total_in": 4320, "completed": 3715, "efficiency_pct": 86.0 },
+    "prev_kpi": { "total_in": 4380, "completed": 3772, "efficiency_pct": 86.1 },
+    "departments": [
+      { "name": "Chaxlash",       "came_in": 920,  "completed": 845, "efficiency": 91.8, "status": "good" },
+      { "name": "Lazer",          "came_in": 810,  "completed": 712, "efficiency": 87.9, "status": "good" },
+      { "name": "Quyish PU",      "came_in": 740,  "completed": 598, "efficiency": 80.8, "status": "medium" },
+      { "name": "Quyish TEP",     "came_in": 680,  "completed": 541, "efficiency": 79.6, "status": "medium" },
+      { "name": "Sifat Nazorati", "came_in": 650,  "completed": 390, "efficiency": 60.0, "status": "medium" },
+      { "name": "Sklad",          "came_in": 520,  "completed": 629, "efficiency": 92.3, "status": "good" }
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "daily": {
+    "orders":   { "count": 14 },
+    "inbound":  { "came_in": 8,  "completed": 7,  "pct": 87.5 },
+    "outbound": { "came_in": 9,  "approved": 8,   "pct": 88.9 },
+    "avg_lead_time_days": 3.2,
+    "overdue_count": 2
+  },
+  "weekly": {
+    "orders":   { "count": 48 },
+    "inbound":  { "came_in": 22, "completed": 18, "pct": 81.8 },
+    "outbound": { "came_in": 24, "approved": 21,  "pct": 87.5 },
+    "avg_lead_time_days": 3.8,
+    "overdue_count": 5
+  },
+  "monthly": {
+    "orders":   { "count": 114 },
+    "inbound":  { "came_in": 49, "completed": 42, "pct": 85.7 },
+    "outbound": { "came_in": 53, "approved": 46,  "pct": 86.8 },
+    "avg_lead_time_days": 4.1,
+    "overdue_count": 11
+  }
+}

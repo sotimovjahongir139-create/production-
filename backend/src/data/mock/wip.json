@@ -1,0 +1,59 @@
+{
+  "summary": { "total": 18, "overdue": 5, "due_soon": 6 },
+  "columns": [
+    {
+      "department": "Chaxlash",
+      "count": 3,
+      "cards": [
+        { "id": "3082", "title": "Baxtiyor Bozor — EVA 045 Qora", "deadline": "2026-06-09", "days_in_stage": 6, "status": "overdue" },
+        { "id": "3091", "title": "Nodira Usmonova — EVA 050 Oq",  "deadline": "2026-06-14", "days_in_stage": 3, "status": "due_soon" },
+        { "id": "3097", "title": "Alisher Karimov — EVA 055 Yashil", "deadline": "2026-06-19", "days_in_stage": 1, "status": "ok" }
+      ]
+    },
+    {
+      "department": "Lazer",
+      "count": 3,
+      "cards": [
+        { "id": "3071", "title": "Shamsiya Tosheva — EVA 048 Qora", "deadline": "2026-06-10", "days_in_stage": 8, "status": "overdue" },
+        { "id": "3088", "title": "Jasur Rahimov — EVA 056 Ko'k",    "deadline": "2026-06-15", "days_in_stage": 2, "status": "due_soon" },
+        { "id": "3099", "title": "Malika Yusupova — EVA 032 Qizil", "deadline": "2026-06-20", "days_in_stage": 1, "status": "ok" }
+      ]
+    },
+    {
+      "department": "Quyish PU",
+      "count": 4,
+      "cards": [
+        { "id": "3065", "title": "Firdavs Nazarov — EVA 019 Oq",        "deadline": "2026-06-08", "days_in_stage": 10, "status": "overdue" },
+        { "id": "3079", "title": "Sarvinoz Abdullayeva — EVA 046 Yashil","deadline": "2026-06-11", "days_in_stage": 7,  "status": "overdue" },
+        { "id": "3086", "title": "Otabek Mirzayev — EVA 045 Ko'k",      "deadline": "2026-06-13", "days_in_stage": 4,  "status": "due_soon" },
+        { "id": "3093", "title": "Dilnoza Xasanova — EVA 050 Qora",     "deadline": "2026-06-17", "days_in_stage": 2,  "status": "ok" }
+      ]
+    },
+    {
+      "department": "Quyish TEP",
+      "count": 3,
+      "cards": [
+        { "id": "3075", "title": "Murod Ergashev — EVA 055 Oq",      "deadline": "2026-06-12", "days_in_stage": 5, "status": "due_soon" },
+        { "id": "3089", "title": "Zulfiya Komilov — EVA 048 Yashil", "deadline": "2026-06-15", "days_in_stage": 2, "status": "due_soon" },
+        { "id": "3101", "title": "Sanjar Tursunov — EVA 056 Qizil",  "deadline": "2026-06-22", "days_in_stage": 1, "status": "ok" }
+      ]
+    },
+    {
+      "department": "Sifat Nazorati",
+      "count": 2,
+      "cards": [
+        { "id": "3077", "title": "Hulkar Qodirov — EVA 032 Ko'k",  "deadline": "2026-06-11", "days_in_stage": 4, "status": "overdue" },
+        { "id": "3094", "title": "Bobur Ismoilov — EVA 040 Oq",    "deadline": "2026-06-18", "days_in_stage": 1, "status": "ok" }
+      ]
+    },
+    {
+      "department": "Sklad",
+      "count": 3,
+      "cards": [
+        { "id": "3083", "title": "Nargiza Holmatova — EVA 045 Yashil", "deadline": "2026-06-14", "days_in_stage": 3, "status": "due_soon" },
+        { "id": "3096", "title": "Eldor Razzaqov — EVA 019 Ko'k",     "deadline": "2026-06-21", "days_in_stage": 2, "status": "ok" },
+        { "id": "3102", "title": "Kamola Nazarova — EVA 050 Qora",    "deadline": "2026-06-25", "days_in_stage": 1, "status": "ok" }
+      ]
+    }
+  ]
+}

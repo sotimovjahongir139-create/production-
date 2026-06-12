@@ -1,0 +1,98 @@
+{
+  "daily": {
+    "kpi": {
+      "jami_reja": 475,
+      "fakt": 412,
+      "bajarilish_pct": 86.7,
+      "product_types": 13,
+      "largest": { "name": "EVA 045", "units": 88 }
+    },
+    "products": [
+      { "name": "EVA 045", "reja": 95,  "fakt": 88  },
+      { "name": "EVA 050", "reja": 70,  "fakt": 62  },
+      { "name": "EVA 055", "reja": 55,  "fakt": 48  },
+      { "name": "EVA 056", "reja": 48,  "fakt": 42  },
+      { "name": "EVA 048", "reja": 42,  "fakt": 38  },
+      { "name": "EVA 019", "reja": 35,  "fakt": 32  },
+      { "name": "EVA 032", "reja": 32,  "fakt": 28  },
+      { "name": "EVA 046", "reja": 28,  "fakt": 24  },
+      { "name": "EVA 040", "reja": 22,  "fakt": 20  },
+      { "name": "EVA 041", "reja": 22,  "fakt": 14  },
+      { "name": "EVA 038", "reja": 18,  "fakt": 10  },
+      { "name": "EVA 022", "reja": 5,   "fakt": 4   },
+      { "name": "EVA 011", "reja": 3,   "fakt": 2   }
+    ],
+    "share": [
+      { "name": "EVA 045", "pct": 21.4 },
+      { "name": "EVA 050", "pct": 15.0 },
+      { "name": "EVA 055", "pct": 11.7 },
+      { "name": "EVA 056", "pct": 10.2 },
+      { "name": "EVA 048", "pct": 9.2  },
+      { "name": "Boshqalar", "pct": 32.5 }
+    ]
+  },
+  "weekly": {
+    "kpi": {
+      "jami_reja": 3262,
+      "fakt": 2856,
+      "bajarilish_pct": 87.6,
+      "product_types": 13,
+      "largest": { "name": "EVA 045", "units": 612 }
+    },
+    "products": [
+      { "name": "EVA 045", "reja": 650,  "fakt": 612 },
+      { "name": "EVA 050", "reja": 490,  "fakt": 430 },
+      { "name": "EVA 055", "reja": 380,  "fakt": 335 },
+      { "name": "EVA 056", "reja": 330,  "fakt": 290 },
+      { "name": "EVA 048", "reja": 295,  "fakt": 264 },
+      { "name": "EVA 019", "reja": 240,  "fakt": 220 },
+      { "name": "EVA 032", "reja": 215,  "fakt": 196 },
+      { "name": "EVA 046", "reja": 190,  "fakt": 168 },
+      { "name": "EVA 040", "reja": 155,  "fakt": 140 },
+      { "name": "EVA 041", "reja": 150,  "fakt": 98  },
+      { "name": "EVA 038", "reja": 110,  "fakt": 58  },
+      { "name": "EVA 022", "reja": 35,   "fakt": 28  },
+      { "name": "EVA 011", "reja": 22,   "fakt": 17  }
+    ],
+    "share": [
+      { "name": "EVA 045", "pct": 21.4 },
+      { "name": "EVA 050", "pct": 15.1 },
+      { "name": "EVA 055", "pct": 11.7 },
+      { "name": "EVA 056", "pct": 10.2 },
+      { "name": "EVA 048", "pct": 9.2  },
+      { "name": "Boshqalar", "pct": 32.4 }
+    ]
+  },
+  "monthly": {
+    "kpi": {
+      "jami_reja": 10060,
+      "fakt": 9050,
+      "bajarilish_pct": 90.0,
+      "product_types": 13,
+      "largest": { "name": "EVA 045", "units": 4288 }
+    },
+    "products": [
+      { "name": "EVA 045", "reja": 4500, "fakt": 4288 },
+      { "name": "EVA 050", "reja": 1400, "fakt": 1200 },
+      { "name": "EVA 055", "reja": 600,  "fakt": 520  },
+      { "name": "EVA 056", "reja": 520,  "fakt": 480  },
+      { "name": "EVA 048", "reja": 500,  "fakt": 445  },
+      { "name": "EVA 019", "reja": 450,  "fakt": 412  },
+      { "name": "EVA 032", "reja": 420,  "fakt": 380  },
+      { "name": "EVA 046", "reja": 400,  "fakt": 352  },
+      { "name": "EVA 040", "reja": 350,  "fakt": 320  },
+      { "name": "EVA 041", "reja": 350,  "fakt": 244  },
+      { "name": "EVA 038", "reja": 300,  "fakt": 180  },
+      { "name": "EVA 022", "reja": 150,  "fakt": 128  },
+      { "name": "EVA 011", "reja": 120,  "fakt": 101  }
+    ],
+    "share": [
+      { "name": "EVA 045", "pct": 47.4 },
+      { "name": "EVA 050", "pct": 13.3 },
+      { "name": "EVA 055", "pct": 5.7  },
+      { "name": "EVA 056", "pct": 5.3  },
+      { "name": "EVA 048", "pct": 4.9  },
+      { "name": "Boshqalar", "pct": 23.4 }
+    ]
+  }
+}

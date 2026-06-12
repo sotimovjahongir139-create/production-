@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: ishlab-chiqarish
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: DATA_SOURCE
+        value: mock
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false
