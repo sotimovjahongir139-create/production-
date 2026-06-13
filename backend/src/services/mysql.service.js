@@ -119,10 +119,10 @@ async function getSklad(period) {
       ),
     ]);
 
-    const ibKirdi = ib.kirdi        || 0;
-    const ibBaj   = ib.bajarildi    || 0;
-    const obKirdi = ob.chiqim       || 0;
-    const obTasd  = ob.tasdiqlangan || 0;
+    const ibKirdi = Number(ib.kirdi)        || 0;
+    const ibBaj   = Number(ib.bajarildi)    || 0;
+    const obKirdi = Number(ob.chiqim)       || 0;
+    const obTasd  = Number(ob.tasdiqlangan) || 0;
 
     return {
       orders:   { count: ord.zakaz_soni || 0 },
@@ -216,18 +216,18 @@ async function getProducts(period) {
       ),
     ]);
 
-    const totalFakt = kpiRow.jami_fakt  || 0;
-    const tovarTuri = kpiRow.tovar_turi || 0;
+    const totalFakt = Number(kpiRow.jami_fakt)  || 0;
+    const tovarTuri = Number(kpiRow.tovar_turi) || 0;
     const top5      = products.slice(0, 5);
-    const othFakt   = products.slice(5).reduce((s, p) => s + (p.fakt || 0), 0);
+    const othFakt   = products.slice(5).reduce((s, p) => s + (Number(p.fakt) || 0), 0);
 
     const share = [
-      ...top5.map(p => ({ name: p.mahsulot, pct: p.ulush_pct || 0 })),
+      ...top5.map(p => ({ name: p.mahsulot, pct: Number(p.ulush_pct) || 0 })),
       ...(othFakt && totalFakt
         ? [{ name: 'Boshqalar', pct: Math.round(othFakt / totalFakt * 1000) / 10 }]
         : []),
     ];
-    const productList = products.map(p => ({ name: p.mahsulot, fakt: p.fakt || 0, reja: null }));
+    const productList = products.map(p => ({ name: p.mahsulot, fakt: Number(p.fakt) || 0, reja: null }));
     const largest     = productList[0] || { name: '—', fakt: 0 };
 
     return {
