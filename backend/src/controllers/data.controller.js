@@ -26,7 +26,7 @@ async function getSklad(req, res, next) {
 }
 
 async function getWip(req, res, next) {
-  try { res.json(await dataService.getWip()); }
+  try { res.json(await dataService.getWip(getPeriod(req))); }
   catch (err) { next(err); }
 }
 

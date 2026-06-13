@@ -9,15 +9,21 @@ function statusColor(status) {
 
 function cardHTML(card) {
   const color = statusColor(card.status);
+  const dlPart = card.deadline
+    ? `<div class="kc-deadline">
+        <span class="kc-dl-label">Deadline: ${fmtDeadline(card.deadline)}</span>
+        <span class="kc-dot dot-${color}"></span>
+       </div>`
+    : '';
+  const bottom = card.quantity != null
+    ? `${card.quantity} dona · ${card.days_in_stage} kun`
+    : `${card.days_in_stage} kundan beri shu bo'limda`;
   return `
     <div class="kc kc-${card.status}" data-id="${card.id}">
       <div class="kc-id">#${card.id}</div>
       <div class="kc-title">${card.title}</div>
-      <div class="kc-deadline">
-        <span class="kc-dl-label">Deadline: ${fmtDeadline(card.deadline)}</span>
-        <span class="kc-dot dot-${color}"></span>
-      </div>
-      <div class="kc-days">${card.days_in_stage} kundan beri shu bo'limda</div>
+      ${dlPart}
+      <div class="kc-days">${bottom}</div>
     </div>`;
 }
 

@@ -34,6 +34,6 @@ async function login(username, password) {
 async function getCards(period)    { return request(`/cards?period=${period}`); }
 async function getProducts(period) { return request(`/products?period=${period}`); }
 async function getSklad(period)    { return request(`/sklad?period=${period}`); }
-async function getWip()            { return request('/wip'); }
+async function getWip(period)      { return request(`/wip?period=${period}`); }
 
 window.API = { login, getCards, getProducts, getSklad, getWip };

@@ -2,29 +2,36 @@ const db = require('../db/mysql');
 
 // ── helpers ─────────────────────────────────────────────────────────────────
 
-function fmtDate(d) { return d.toISOString().slice(0, 10); }
-
-function getRange(period) {
-  const today = new Date(); today.setHours(0, 0, 0, 0);
-  const tom   = new Date(today); tom.setDate(tom.getDate() + 1);
-  let from, to_excl, pf, pt;
+function getPeriodDates(period) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const fmt = d => d.toISOString().slice(0, 10);
 
   if (period === 'daily') {
-    from = today; to_excl = tom;
-    pf = new Date(today); pf.setDate(pf.getDate() - 1); pt = today;
-  } else if (period === 'weekly') {
-    from = new Date(today); from.setDate(from.getDate() - 6); to_excl = tom;
-    pf = new Date(from); pf.setDate(pf.getDate() - 7); pt = from;
-  } else {
-    from = new Date(today.getFullYear(), today.getMonth(), 1); to_excl = tom;
-    const len = Math.round((to_excl - from) / 86400000);
-    pf = new Date(from); pf.setDate(pf.getDate() - len); pt = from;
+    const from     = new Date(today); from.setDate(today.getDate() - 1);
+    const to       = new Date(today);
+    const prevFrom = new Date(today); prevFrom.setDate(today.getDate() - 2);
+    const prevTo   = new Date(from);
+    return { from: fmt(from), to: fmt(to), prevFrom: fmt(prevFrom), prevTo: fmt(prevTo) };
   }
-  return { from: fmtDate(from), to: fmtDate(to_excl),
-           pf: fmtDate(pf),   pt: fmtDate(pt) };
+  if (period === 'weekly') {
+    const wd       = today.getDay() === 0 ? 6 : today.getDay() - 1;
+    const from     = new Date(today); from.setDate(today.getDate() - wd);
+    const to       = new Date(from);  to.setDate(from.getDate() + 7);
+    const prevFrom = new Date(from);  prevFrom.setDate(from.getDate() - 7);
+    const prevTo   = new Date(from);
+    return { from: fmt(from), to: fmt(to), prevFrom: fmt(prevFrom), prevTo: fmt(prevTo) };
+  }
+  // monthly
+  const from     = new Date(today.getFullYear(), today.getMonth(), 1);
+  const to       = new Date(today); to.setDate(today.getDate() + 1);
+  const prevFrom = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+  const prevTo   = new Date(today.getFullYear(), today.getMonth(), 1);
+  return { from: fmt(from), to: fmt(to), prevFrom: fmt(prevFrom), prevTo: fmt(prevTo) };
 }
 
-function deptStatus(eff) {
+function deptStatus(eff, kirdi) {
+  if (!kirdi) return 'good';
   return eff >= 85 ? 'good' : eff >= 60 ? 'medium' : 'critical';
 }
 
@@ -36,33 +43,34 @@ async function wrap(fn) {
 // ── getCards ─────────────────────────────────────────────────────────────────
 
 async function runCards(f, t) {
-  const sql = `
+  return db.query(`
     SELECT j.id, j.name,
-      SUM(p.started  >= ? AND p.started  < ?) AS kirdi,
-      SUM(p.finished >= ? AND p.finished < ?) AS bajarildi
+      COUNT(CASE WHEN p.started >= ? AND p.started < ? THEN 1 END) AS kirdi,
+      COUNT(CASE WHEN p.started  >= ? AND p.started  < ?
+                 AND p.finished >= ? AND p.finished < ? THEN 1 END) AS bajarildi
     FROM production_proizvodstvo p
     JOIN production_jarayon j ON p.jarayon_id = j.id
-    WHERE (p.started >= ? AND p.started < ?)
-       OR (p.finished >= ? AND p.finished < ?)
-    GROUP BY j.id, j.name ORDER BY j.id`;
-  return db.query(sql, [f, t, f, t, f, t, f, t]);
+    WHERE p.started >= ? AND p.started < ?
+    GROUP BY j.id, j.name ORDER BY j.id`,
+    [f, t, f, t, f, t, f, t]
+  );
 }
 
 async function getCards(period) {
   return wrap(async () => {
-    const { from, to, pf, pt } = getRange(period);
-    const [cur, prv] = await Promise.all([runCards(from, to), runCards(pf, pt)]);
+    const { from, to, prevFrom, prevTo } = getPeriodDates(period);
+    const [cur, prv] = await Promise.all([runCards(from, to), runCards(prevFrom, prevTo)]);
 
     const total     = cur.reduce((s, r) => s + (r.kirdi     || 0), 0);
     const completed = cur.reduce((s, r) => s + (r.bajarildi || 0), 0);
-    const prevComp  = prv.reduce((s, r) => s + (r.bajarildi || 0), 0);
-    const eff       = total ? Math.round(completed / total * 1000) / 10 : 0;
-    const chg       = prevComp ? Math.round((completed - prevComp) / prevComp * 1000) / 10 : null;
+    const prevTotal = prv.reduce((s, r) => s + (r.kirdi     || 0), 0);
+    const eff = total ? Math.round(completed / total * 1000) / 10 : 0;
+    const chg = prevTotal ? Math.round((total - prevTotal) / prevTotal * 1000) / 10 : null;
 
     const departments = cur.map(r => {
       const e = r.kirdi ? Math.round(r.bajarildi / r.kirdi * 1000) / 10 : 0;
       return { name: r.name, came_in: r.kirdi || 0, completed: r.bajarildi || 0,
-               efficiency: e, status: deptStatus(e) };
+               efficiency: e, status: deptStatus(e, r.kirdi || 0) };
     });
 
     return { kpi: { total_in: total, completed, efficiency_pct: eff,
@@ -74,151 +82,160 @@ async function getCards(period) {
 
 async function getSklad(period) {
   return wrap(async () => {
-    const { from, to } = getRange(period);
+    const { from, to } = getPeriodDates(period);
 
-    // Real-time (ignores period)
-    const [ov] = await db.query(
-      `SELECT COUNT(*) AS karta, COALESCE(SUM(quantity),0) AS dona
-       FROM production_zakaz
-       WHERE finished IS NULL AND deadline < CURDATE()
-         AND (status IS NULL OR status <> 'Otmen')`  // TODO: verify cancel label via inspect-schema
-    );
-    const [avg] = await db.query(
-      `SELECT ROUND(AVG(DATEDIFF(s.sold_date, z.created)),1) AS kun
-       FROM production_sotuv s JOIN production_zakaz z ON s.order_id = z.id
-       WHERE s.approved = 1 AND s.sold_date >= CURDATE() - INTERVAL 30 DAY`
-    );
+    const [[ov], [ord], [ib], [ob], [avg]] = await Promise.all([
+      db.query(
+        `SELECT COUNT(*) AS karta, COALESCE(SUM(quantity),0) AS dona
+         FROM production_zakaz
+         WHERE finished IS NULL AND deadline >= ? AND deadline < ?
+           AND (status IS NULL OR status <> 'Otmen')`,
+        [from, to]
+      ),
+      db.query(
+        `SELECT COUNT(*) AS zakaz_soni FROM production_skladzakaz
+         WHERE created >= ? AND created < ?`,
+        [from, to]
+      ),
+      db.query(
+        `SELECT COUNT(*) AS kirdi, COALESCE(SUM(quantity),0) AS dona,
+                COUNT(CASE WHEN finished IS NOT NULL THEN 1 END) AS bajarildi
+         FROM production_proizvodstvo
+         WHERE jarayon_id = 5 AND started >= ? AND started < ?`,
+        [from, to]
+      ),
+      db.query(
+        `SELECT COUNT(*) AS chiqim, COALESCE(SUM(quantity),0) AS dona,
+                SUM(approved=1) AS tasdiqlangan
+         FROM production_sotuv
+         WHERE sold_date >= ? AND sold_date < ?`,
+        [from, to]
+      ),
+      db.query(
+        `SELECT ROUND(AVG(DATEDIFF(s.sold_date, z.created)),1) AS ortacha_kun
+         FROM production_sotuv s JOIN production_zakaz z ON s.order_id = z.id
+         WHERE s.approved = 1 AND s.sold_date >= ? AND s.sold_date < ?`,
+        [from, to]
+      ),
+    ]);
 
-    // Period-bound
-    const [ord] = await db.query(
-      `SELECT COUNT(*) AS cnt FROM production_skladzakaz
-       WHERE created >= ? AND created < ?`, [from, to]
-    );
-    const [ib] = await db.query(
-      `SELECT SUM(started  >= ? AND started  < ?) AS kirdi,
-              SUM(finished >= ? AND finished < ?) AS bajarildi
-       FROM production_proizvodstvo
-       WHERE jarayon_id = 5
-         AND ((started >= ? AND started < ?) OR (finished >= ? AND finished < ?))`,
-      [from, to, from, to, from, to, from, to]
-    );
-    const [ob] = await db.query(
-      `SELECT COUNT(*) AS kirdi, SUM(approved=1) AS tasdiqlandi
-       FROM production_sotuv WHERE sold_date >= ? AND sold_date < ?`,
-      [from, to]
-    );
-
-    const ibKirdi = ib[0].kirdi      || 0;
-    const ibBaj   = ib[0].bajarildi  || 0;
-    const obKirdi = ob[0].kirdi      || 0;
-    const obTasd  = ob[0].tasdiqlandi|| 0;
+    const ibKirdi = ib.kirdi        || 0;
+    const ibBaj   = ib.bajarildi    || 0;
+    const obKirdi = ob.chiqim       || 0;
+    const obTasd  = ob.tasdiqlangan || 0;
 
     return {
-      orders:   { count: ord[0].cnt || 0 },
+      orders:   { count: ord.zakaz_soni || 0 },
       inbound:  { came_in: ibKirdi, completed: ibBaj,
                   pct: ibKirdi ? Math.round(ibBaj / ibKirdi * 1000) / 10 : 0 },
       outbound: { came_in: obKirdi, approved: obTasd,
                   pct: obKirdi ? Math.round(obTasd / obKirdi * 1000) / 10 : 0 },
-      avg_lead_time_days: avg[0].kun ?? null,
-      overdue_count: ov[0].karta || 0,
+      avg_lead_time_days: avg.ortacha_kun ?? null,
+      overdue_count: ov.karta || 0,
     };
   });
 }
 
 // ── getWip ───────────────────────────────────────────────────────────────────
 
-async function getWip() {
+async function getWip(period = 'monthly') {
   return wrap(async () => {
-    const rows = await db.query(`
-      SELECT p.id, j.id AS jarayon_id, j.name AS bolim, p.started,
-             DATEDIFF(CURDATE(), p.started) AS days_in_stage,
-             z.id AS zakaz_id, z.deadline,
-             CASE WHEN z.deadline IS NULL THEN 'ok'
-                  WHEN z.deadline < CURDATE() THEN 'overdue'
-                  WHEN z.deadline < CURDATE() + INTERVAL 4 DAY THEN 'due_soon'
-                  ELSE 'ok' END AS holat
-      FROM production_proizvodstvo p
-      JOIN production_jarayon j ON p.jarayon_id = j.id
-      LEFT JOIN production_zakazproizvodstvo zp ON p.zp_id = zp.id
-      LEFT JOIN production_zakaz z ON zp.order_id = z.id
-      WHERE p.finished IS NULL
-      ORDER BY j.id,
-               FIELD(CASE WHEN z.deadline IS NULL THEN 'ok'
-                          WHEN z.deadline < CURDATE() THEN 'overdue'
-                          WHEN z.deadline < CURDATE() + INTERVAL 4 DAY THEN 'due_soon'
-                          ELSE 'ok' END, 'overdue','due_soon','ok'),
-               z.deadline`
-    );
+    const { from, to } = getPeriodDates(period);
+
+    const [deptRows, cardRows] = await Promise.all([
+      db.query(`
+        SELECT j.name AS bolim,
+          COALESCE(COUNT(CASE WHEN p.finished IS NULL
+            AND p.started >= ? AND p.started < ? THEN 1 END), 0) AS soni
+        FROM production_jarayon j
+        LEFT JOIN production_proizvodstvo p ON p.jarayon_id = j.id
+        GROUP BY j.id, j.name ORDER BY j.id`,
+        [from, to]
+      ),
+      db.query(`
+        SELECT p.id AS prod_id, p.zp_id, j.name AS bolim,
+          p.started, zp.order_id, zp.quantity,
+          DATEDIFF(CURDATE(), p.started) AS necha_kun
+        FROM production_proizvodstvo p
+        JOIN production_jarayon j ON p.jarayon_id = j.id
+        LEFT JOIN production_zakazproizvodstvo zp ON p.zp_id = zp.id
+        WHERE p.finished IS NULL AND p.started >= ? AND p.started < ?
+        ORDER BY j.id, p.started`,
+        [from, to]
+      ),
+    ]);
 
     const colMap = {};
-    for (const r of rows) {
+    for (const d of deptRows) {
+      colMap[d.bolim] = { department: d.bolim, count: 0, cards: [] };
+    }
+    for (const r of cardRows) {
       if (!colMap[r.bolim]) colMap[r.bolim] = { department: r.bolim, count: 0, cards: [] };
-      // TODO: after inspect-schema.js, replace fallback title with real client+product columns
-      const title = r.zakaz_id ? `Zakaz #${r.zakaz_id}` : `Kartochka #${r.id}`;
-      const dl    = r.deadline ? new Date(r.deadline).toISOString().slice(0, 10) : null;
-      colMap[r.bolim].cards.push({ id: String(r.id), title, deadline: dl,
-                                   days_in_stage: r.days_in_stage || 0, status: r.holat });
+      const title = r.order_id ? `Zakaz #${r.order_id}` : `Kartochka #${r.prod_id}`;
+      colMap[r.bolim].cards.push({
+        id: String(r.prod_id), title,
+        days_in_stage: r.necha_kun || 0,
+        quantity: r.quantity || null,
+        status: 'ok',
+      });
       colMap[r.bolim].count++;
     }
+
     const columns = Object.values(colMap);
     const all = columns.flatMap(c => c.cards);
     return {
-      summary: { total: all.length,
-                 overdue:  all.filter(c => c.status === 'overdue').length,
-                 due_soon: all.filter(c => c.status === 'due_soon').length },
+      summary: { total: all.length, overdue: 0, due_soon: 0 },
       columns,
     };
   });
 }
 
 // ── getProducts ───────────────────────────────────────────────────────────────
-// TODO: run inspect-schema.js to confirm:
-//   (1) product name column in production_zakazproizvodstvo or joined mahsulot table
-//   (2) actual-units source (production_proizvodstvo.quantity vs COUNT(*))
-//   (3) plan source column name
-// Interim: groups by zakaz_id; replace GROUP BY + name column after inspection.
 
 async function getProducts(period) {
   return wrap(async () => {
-    const { from, to } = getRange(period);
-    // Fakt: count finished productions per zakaz in window
-    const rows = await db.query(`
-      SELECT zp.order_id AS zakaz_id,
-             COUNT(p.id) AS fakt,
-             SUM(zp.quantity) AS reja
-      FROM production_zakazproizvodstvo zp
-      JOIN production_zakaz z ON zp.order_id = z.id
-      LEFT JOIN production_proizvodstvo p
-             ON p.zp_id = zp.id AND p.finished >= ? AND p.finished < ?
-      WHERE z.created >= ? AND z.created < ?
-      GROUP BY zp.order_id
-      HAVING fakt > 0
-      ORDER BY fakt DESC
-      LIMIT 50`, [from, to, from, to]
-    );
+    const { from, to } = getPeriodDates(period);
 
-    const products = rows.map(r => ({
-      name: `Zakaz #${r.zakaz_id}`,  // TODO: replace with real product name after inspection
-      reja: r.reja || null,
-      fakt: r.fakt || 0,
-    }));
+    const [[kpiRow], products] = await Promise.all([
+      db.query(`
+        SELECT COALESCE(SUM(d.quantity),0) AS jami_fakt,
+               COUNT(DISTINCT d.product_id) AS tovar_turi
+        FROM production_dailyproductproduction d
+        WHERE d.date >= ? AND d.date < ?`,
+        [from, to]
+      ),
+      db.query(`
+        SELECT m.name AS mahsulot, SUM(d.quantity) AS fakt,
+               ROUND(SUM(d.quantity) / SUM(SUM(d.quantity)) OVER() * 100, 1) AS ulush_pct
+        FROM production_dailyproductproduction d
+        JOIN production_mahsulot m ON d.product_id = m.id
+        WHERE d.date >= ? AND d.date < ?
+        GROUP BY m.id, m.name
+        ORDER BY fakt DESC`,
+        [from, to]
+      ),
+    ]);
 
-    const totalFakt = products.reduce((s, p) => s + p.fakt, 0);
-    const totalReja = products.reduce((s, p) => s + (p.reja || 0), 0);
-    const baj = totalReja ? Math.round(totalFakt / totalReja * 1000) / 10 : null;
-    const top5 = products.slice(0, 5);
-    const othFakt = products.slice(5).reduce((s, p) => s + p.fakt, 0);
+    const totalFakt = kpiRow.jami_fakt  || 0;
+    const tovarTuri = kpiRow.tovar_turi || 0;
+    const top5      = products.slice(0, 5);
+    const othFakt   = products.slice(5).reduce((s, p) => s + (p.fakt || 0), 0);
+
     const share = [
-      ...top5.map(p => ({ name: p.name, pct: totalFakt ? Math.round(p.fakt / totalFakt * 1000) / 10 : 0 })),
-      ...(othFakt ? [{ name: 'Boshqalar', pct: Math.round(othFakt / totalFakt * 1000) / 10 }] : []),
+      ...top5.map(p => ({ name: p.mahsulot, pct: p.ulush_pct || 0 })),
+      ...(othFakt && totalFakt
+        ? [{ name: 'Boshqalar', pct: Math.round(othFakt / totalFakt * 1000) / 10 }]
+        : []),
     ];
-    const largest = products[0] || { name: '—', units: 0 };
+    const productList = products.map(p => ({ name: p.mahsulot, fakt: p.fakt || 0, reja: null }));
+    const largest     = productList[0] || { name: '—', fakt: 0 };
 
     return {
-      kpi: { jami_reja: totalReja || null, fakt: totalFakt,
-             bajarilish_pct: baj, product_types: products.length,
+      kpi: { jami_reja: null, fakt: totalFakt, bajarilish_pct: null,
+             product_types: tovarTuri,
              largest: { name: largest.name, units: largest.fakt } },
-      products, share,
+      products: productList,
+      share,
     };
   });
 }

@@ -129,7 +129,7 @@ const FETCH_FN = {
   cards:    p => API.getCards(p),
   products: p => API.getProducts(p),
   sklad:    p => API.getSklad(p),
-  wip:      () => API.getWip(),
+  wip:      p => API.getWip(p),
 };
 const RENDER_FN = { cards: renderCards, products: renderProducts, sklad: renderSklad, wip: WIP.renderWip };
 
@@ -140,7 +140,7 @@ async function loadModule(module, period) {
     a.classList.toggle('active', a.dataset.module === module));
   document.querySelectorAll('.btn-period').forEach(b =>
     b.classList.toggle('active', b.dataset.period === period));
-  document.querySelector('.period-buttons').style.visibility = module !== 'wip' ? 'visible' : 'hidden';
+  document.querySelector('.period-buttons').style.visibility = 'visible';
   document.getElementById('module-title').textContent = MODULES[module];
 
   // Don't blank content on background refresh — only show loader on first load
@@ -170,7 +170,7 @@ function startPolling() {
   if (_pollTimer) clearInterval(_pollTimer);
   _pollTimer = setInterval(() => {
     if (!document.hidden) loadModule(currentModule, currentPeriod);
-  }, 60000);
+  }, 120000);
 }
 
 /* ===== Mobile sidebar ===== */

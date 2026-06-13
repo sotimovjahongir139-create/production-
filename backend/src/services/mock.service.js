@@ -30,7 +30,7 @@ function getSklad(period) {
   return data;
 }
 
-function getWip() {
+function getWip(_period) {
   return wipData;
 }
 
