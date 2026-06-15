@@ -9,8 +9,18 @@ services:
       - key: PORT
         value: 3000
       - key: DATA_SOURCE
-        value: mock
+        value: mysql
       - key: JWT_SECRET
         generateValue: true
       - key: ADMIN_PASSWORD
-        sync: false
+        value: arkonproduction_09
+      - key: DB_HOST
+        value: de.ahost.cloud
+      - key: DB_PORT
+        value: 3306
+      - key: DB_USER
+        value: arconper_readonly
+      - key: DB_PASSWORD
+        value: "arkon08_trello#jg$9"
+      - key: DB_NAME
+        value: arconper_arcon
