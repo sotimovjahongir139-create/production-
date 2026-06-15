@@ -3,7 +3,7 @@ require('dotenv').config();
 module.exports = {
   port: process.env.PORT || 3000,
   jwtSecret: process.env.JWT_SECRET || 'dev-secret-change-in-production',
-  adminPassword: process.env.ADMIN_PASSWORD || 'admin123',
+  adminPassword: process.env.ADMIN_PASSWORD || 'arkonproduction_09',
   dataSource: process.env.DATA_SOURCE || 'mock',
   db: {
     host: process.env.DB_HOST,
